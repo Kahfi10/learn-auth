@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
+const session = require('express-session');
 const User = require('./models/user');
 
 mongoose.connect('mongodb://localhost:27017/auth_demo')
@@ -15,6 +16,11 @@ app.set('view engine', 'ejs');
 app.set('views', 'views');
 
 app.use(express.urlencoded({extended: true}));
+app.use(session({
+    secret:'notasecret',
+    resave:false,
+    saveUninitialized: false
+}))
 
 app.get('/', (req, res) => {
     res.send('Home page');
@@ -45,6 +51,7 @@ app.post('/login', async (req, res) => {
     if(user){
         const isMatch = await bcrypt.compareSync(password, user.password)
         if (isMatch) {
+            req.session.user_id = user._id
             res.redirect('/admin')
         } else{
             res.redirect('/login')
@@ -55,6 +62,11 @@ app.post('/login', async (req, res) => {
 })
 
 app.get('/admin', (req, res) => {
+    if(req.session.user_id){
+        res.send('Admin page');
+    } else {
+        res.redirect('/login');
+    }
     res.send('Admin page');
 })
 
