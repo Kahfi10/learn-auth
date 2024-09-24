@@ -61,13 +61,18 @@ app.post('/login', async (req, res) => {
     }
 })
 
+app.post('/logout', (req, res) => {
+    // req.session.user_id = null;
+    req.session.destroy(() => {
+        res.redirect('/login')
+    });
+})
+
 app.get('/admin', (req, res) => {
-    if(req.session.user_id){
-        res.send('Admin page');
-    } else {
-        res.redirect('/login');
+    if(!req.session.user_id) {
+        res.redirect('/login')
     }
-    res.send('Admin page');
+    res.render('admin')  
 })
 
 app.listen(3000, () => {
