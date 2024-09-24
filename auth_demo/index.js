@@ -35,6 +35,25 @@ app.post('/register', async (req, res) => {
     res.redirect('/');
 })
 
+app.get('/login', (req, res) => {
+    res.render('login');
+})
+
+app.post('/login', async (req, res) => {
+    const { username, password } = req.body;
+    const user = await User.findOne({username})
+    if(user){
+        const isMatch = await bcrypt.compareSync(password, user.password)
+        if (isMatch) {
+            res.redirect('/admin')
+        } else{
+            res.redirect('/login')
+        }
+    } else {
+        res.redirect('/login')
+    }
+})
+
 app.get('/admin', (req, res) => {
     res.send('Admin page');
 })
