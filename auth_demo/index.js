@@ -22,6 +22,13 @@ app.use(session({
     saveUninitialized: false
 }))
 
+const auth = (req, res, next) => {
+    if(!req.session.user_id){
+        return res.redirect('/login');
+    }
+    next();
+}
+
 app.get('/', (req, res) => {
     res.send('Home page');
 })
@@ -61,18 +68,19 @@ app.post('/login', async (req, res) => {
     }
 })
 
-app.post('/logout', (req, res) => {
+app.post('/logout', auth, (req, res) => {
     // req.session.user_id = null;
     req.session.destroy(() => {
         res.redirect('/login')
     });
 })
 
-app.get('/admin', (req, res) => {
-    if(!req.session.user_id) {
-        res.redirect('/login')
-    }
+app.get('/admin', auth, (req, res) => {
     res.render('admin')  
+})
+
+app.get('/profile/setting', auth, (req, res) => {
+    res.send('Profile Setting:' + req.session.user_id)
 })
 
 app.listen(3000, () => {
